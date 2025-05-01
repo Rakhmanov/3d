@@ -4,7 +4,7 @@ import subprocess
 
 # Get changed files from the current commit
 changed_files = subprocess.check_output(
-    ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD']
+    ['git', 'diff-tree', '--no-commit-id', '--name-only', '--diff-filter=ACMR', '-r', 'HEAD']
 ).decode().splitlines()
 
 entries = []
