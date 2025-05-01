@@ -33,7 +33,8 @@ jobs:
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix).include }}
+      matrix: 
+        include: ${{ fromJson(needs.generate-matrix.outputs.matrix).include }}
     defaults:
       run:
         working-directory: ${{ matrix.folder }}
