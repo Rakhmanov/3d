@@ -30,7 +30,7 @@ jobs:
 
   render-with-preview:
     if: ${{ needs.generate-matrix.outputs.matrix != '' }}
-    name: Render ${{ matrix.folder }}/{{ matrix.name }}.scad
+    name: Render ${{ matrix.folder }}/${{ matrix.name }}.scad
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
