@@ -29,7 +29,6 @@ jobs:
         run: python3 .github/matrix/generate.py
 
   render-with-preview:
-    if: ${{ matrix.name != '' }}
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
