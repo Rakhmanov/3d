@@ -61,7 +61,6 @@ jobs:
       # Readme
       - name: Create README.md if missing
         run: |
-          cd 
           if [ ! -f README.md ]; then
             echo "# ${{ steps.extract.outputs.scad_name }}" > README.md
             echo "" >> README.md

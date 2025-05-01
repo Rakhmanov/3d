@@ -2,10 +2,10 @@
 
 // Parameters
 diameter = 58.5;           // Outer diameter (mm)
-fold_sections = 5;         // Number of accordion folds
+fold_sections = 4;         // Number of accordion folds
 wall_thickness = 0.8;      // Wall thickness (mm)
 wave_depth = 8.0;          // Depth of each accordion wave (mm)
-height_per_fold = 4;       // Height of each fold (mm)
+height_per_fold = 5;       // Height of each fold (mm)
 fit_tolerance = 0;         // Tolerance for tighter fit bottom/top (mm). Sane values: (0-1)
 sgmt = 120;                // Number of sgmt per fold (must be even for wave)
 insert_height = 10.5;      // Heigh used for inserts
