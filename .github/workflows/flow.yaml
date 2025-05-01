@@ -25,7 +25,6 @@ jobs:
       - name: Install deps
         run: pip install -r .github/preview/requirements.txt
       - name: Find SCAD folders
-        description: 
         id: set-matrix
         run: python3 ./github/matrix/generate.py
 
