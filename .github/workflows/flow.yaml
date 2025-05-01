@@ -49,24 +49,15 @@ jobs:
 
       # Render STL
       - name: Render STL
-        uses: pkoehlers/openscad-build-action@v1.0.2
-        with:
-          input-file: '${{ steps.extract.outputs.scad_name }}.scad'
-          output-file: '${{ steps.extract.outputs.scad_name }}.stl'
-          # customizer-parameter-file: 'model.json'
-          # customizer-parameter-set: 'with_something'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - run: echo '${{ steps.cp313.outputs.cache-hit }}'
-
-      - name: Install deps
-        run: pip install -r ../.github/preview/requirements.txt
-
-      - name: Generate image from STL
-        run: python ../.github/preview/main.py ${{ steps.extract.outputs.scad_name }}.stl
+        run: |
+          docker run \
+            -it \
+            --rm \
+            -v $(pwd):/openscad \
+            -u $(id -u ${USER}):$(id -g ${USER}) \
+            openscad/openscad:latest \
+            openscad -o ${{ steps.extract.outputs.scad_name }}.stl ${{ steps.extract.outputs.scad_name }}.scad \
+              -o ${{ steps.extract.outputs.scad_name }}.png ${{ steps.extract.outputs.scad_name }}.scad
 
       - name: Check the results image from STL
         run: ls ${{ matrix.folder }}/${{ steps.extract.outputs.scad_name }}.png
