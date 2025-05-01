@@ -23,9 +23,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
-      - name: Install deps
-        run: pip install -r .github/preview/requirements.txt
       - name: Find SCAD folders
         id: set-matrix
         run: python3 .github/matrix/generate.py
@@ -40,6 +37,7 @@ jobs:
         working-directory: ${{ matrix.folder }}
 
     steps:
+      - uses: actions/checkout@v4
       - name: Find scad file
         id: extract
         run: |
@@ -60,7 +58,7 @@ jobs:
               -o ${{ steps.extract.outputs.scad_name }}.png ${{ steps.extract.outputs.scad_name }}.scad
 
       - name: Check the results image from STL
-        run: ls ${{ matrix.folder }}/${{ steps.extract.outputs.scad_name }}.png
+        run: ls ${{ steps.extract.outputs.scad_name }}.png
 
       # Readme
       - name: Create README.md if missing
