@@ -46,16 +46,18 @@ jobs:
           echo "scad_name=$name" >> "$GITHUB_OUTPUT"
 
       # Render STL
-      - name: Render STL
+      - name: Render SCAD to STL and PNG using OpenSCAD Docker
         run: |
           docker run \
-            -it \
             --rm \
-            -v $(pwd):/openscad \
-            -u $(id -u ${USER}):$(id -g ${USER}) \
+            -v "$PWD":/openscad \
+            -w /openscad \
             openscad/openscad:latest \
-            openscad -o ${{ steps.extract.outputs.scad_name }}.stl ${{ steps.extract.outputs.scad_name }}.scad \
-              -o ${{ steps.extract.outputs.scad_name }}.png ${{ steps.extract.outputs.scad_name }}.scad
+            openscad \
+              -o "${{ steps.extract.outputs.scad_name }}.stl" "${{ steps.extract.outputs.scad_name }}.scad" \
+              --imgsize 800,600 \
+              --render \
+              -o "${{ steps.extract.outputs.scad_name }}.png" "${{ steps.extract.outputs.scad_name }}.scad"
 
       - name: Check the results image from STL
         run: ls ${{ steps.extract.outputs.scad_name }}.png
