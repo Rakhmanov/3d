@@ -52,8 +52,8 @@ jobs:
 
       - name: Render PNG
         run: |
-          docker run --rm -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
-            openscad -o "${{ steps.extract.outputs.scad_name }}.png" --imgsize 800,600 --render "${{ steps.extract.outputs.scad_name }}.scad"
+          docker run --rm --init -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
+            xvfb-run -a openscad -o "${{ steps.extract.outputs.scad_name }}.png" --imgsize=800,600 --render --viewall "${{ steps.extract.outputs.scad_name }}.scad"
 
       - name: Check the results image from STL
         run: ls ${{ steps.extract.outputs.scad_name }}.png
