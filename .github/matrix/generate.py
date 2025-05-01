@@ -16,7 +16,9 @@ for path in changed_files:
         extension = splitName[1]
         entries.append({"folder": folder, "name": name, "extension": extension})
 
-matrix = {'include': sorted(entries)}
-print(f'matrix={json.dumps(matrix)}')
-with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-    f.write(f'matrix={json.dumps(matrix)}\n')
+if entries:
+    matrix = {"include": entries}
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+        f.write(f"matrix={json.dumps(matrix)}\n")
+else:
+    print("No valid entries; skipping matrix.")
