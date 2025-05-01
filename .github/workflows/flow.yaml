@@ -26,7 +26,7 @@ jobs:
         run: pip install -r .github/preview/requirements.txt
       - name: Find SCAD folders
         id: set-matrix
-        run: python3 ./github/matrix/generate.py
+        run: python3 .github/matrix/generate.py
 
   render-with-preview:
     needs: generate-matrix
