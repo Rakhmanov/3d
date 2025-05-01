@@ -14,7 +14,7 @@ for path in changed_files:
         folder = os.path.dirname(path)
         name = splitName[0]
         extension = splitName[1]
-        entries.append({"folder": folder, "name": name, "extension": extension})
+        entries.append({"folder": folder, "name": name})
 
 if entries:
     matrix = {"include": entries}

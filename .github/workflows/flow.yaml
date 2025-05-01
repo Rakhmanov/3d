@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   generate-matrix:
+    name: Detect Changed SCAD files
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -30,7 +31,7 @@ jobs:
 
   render-with-preview:
     if: ${{ needs.generate-matrix.outputs.matrix != '' }}
-    name: Render ${{ matrix.folder }}/${{ matrix.name }}.scad
+    name: Generate Previews
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
