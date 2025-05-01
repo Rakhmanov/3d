@@ -1,0 +1,94 @@
+name: Render STL Previews
+
+on:
+  push:
+    branches:
+        - main
+        - flow
+  workflow_dispatch:
+
+
+permissions:
+  contents: read # access to check out code and install dependencies
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pythone with Cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install deps
+        run: pip install -r .github/preview/requirements.txt
+      - name: Find SCAD folders
+        description: 
+        id: set-matrix
+        run: python3 ./github/matrix/generate.py
+
+  render-with-preview:
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.folder }}
+
+    steps:
+      - name: Find scad file
+        id: extract
+        run: |
+          name=$(basename "$(find . -name '*.scad' | head -n1)" .scad)
+          echo "Found .scad file: $name"
+          echo "scad_name=$name" >> "$GITHUB_OUTPUT"
+
+      # Render STL
+      - name: Render STL
+        uses: pkoehlers/openscad-build-action@v1
+        with:
+          input-file: '${{ steps.extract.outputs.scad_name }}.scad'
+          output-file: '${{ steps.extract.outputs.scad_name }}.stl'
+          # customizer-parameter-file: 'model.json'
+          # customizer-parameter-set: 'with_something'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - run: echo '${{ steps.cp313.outputs.cache-hit }}'
+
+      - name: Install deps
+        run: pip install -r ../.github/preview/requirements.txt
+
+      - name: Generate image from STL
+        run: python ../.github/preview/main.py ${{ steps.extract.outputs.scad_name }}.stl
+
+      - name: Check the results image from STL
+        run: ls ${{ matrix.folder }}/${{ steps.extract.outputs.scad_name }}.png
+
+      # Readme
+      - name: Create README.md if missing
+        run: |
+          cd 
+          if [ ! -f README.md ]; then
+            echo "# ${{ steps.extract.outputs.scad_name }}" > README.md
+            echo "" >> README.md
+            echo "![preview](${{ steps.extract.outputs.scad_name }}.png)" >> README.md
+            echo "Created README.md"
+          else
+            echo "README.md already exists, skipping creation"
+          fi
+
+      # Commit
+      - name: Commit and push changes
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Add STL & preview for ${{ matrix.folder }}/${{ steps.extract.outputs.scad_name }}.scad" || echo "No changes to commit"
+          git push
