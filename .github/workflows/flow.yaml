@@ -54,10 +54,11 @@ jobs:
             -w /openscad \
             openscad/openscad:latest \
             openscad \
-              -o "${{ steps.extract.outputs.scad_name }}.stl" "${{ steps.extract.outputs.scad_name }}.scad" \
+              -o "${{ steps.extract.outputs.scad_name }}.stl" \
+              -o "${{ steps.extract.outputs.scad_name }}.png" \
               --imgsize 800,600 \
               --render \
-              -o "${{ steps.extract.outputs.scad_name }}.png" "${{ steps.extract.outputs.scad_name }}.scad"
+              "${{ steps.extract.outputs.scad_name }}.scad"
 
       - name: Check the results image from STL
         run: ls ${{ steps.extract.outputs.scad_name }}.png
