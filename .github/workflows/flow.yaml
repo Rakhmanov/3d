@@ -24,58 +24,47 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Find SCAD folders
+      - name: Find SCAD files
         id: set-matrix
         run: python3 .github/matrix/generate.py
 
   render-with-preview:
+    if: ${{ matrix.name != '' }}
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix).include }}
     defaults:
       run:
         working-directory: ${{ matrix.folder }}
-
     steps:
       - uses: actions/checkout@v4
-      - name: Find scad file
-        id: extract
-        run: |
-          name=$(basename "$(find . -name '*.scad' | head -n1)" .scad)
-          echo "Found .scad file: $name"
-          echo "scad_name=$name" >> "$GITHUB_OUTPUT"
-
       - name: Render STL
         run: |
           docker run --rm -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
-            openscad -o "${{ steps.extract.outputs.scad_name }}.stl" "${{ steps.extract.outputs.scad_name }}.scad"
-
+            openscad -o "${{ matrix.name }}.stl" "${{ matrix.name }}.scad"
       - name: Render PNG
         run: |
           docker run --rm --init -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
-            xvfb-run -a openscad -o "${{ steps.extract.outputs.scad_name }}.png" --imgsize=800,600 --render --viewall "${{ steps.extract.outputs.scad_name }}.scad"
-
+            xvfb-run -a openscad -o "${{ matrix.name }}.png" --imgsize=800,600 --render --viewall "${{ matrix.name }}.scad"
       - name: Check the results image from STL
-        run: ls ${{ steps.extract.outputs.scad_name }}.png
-
+        run: ls ${{ matrix.name }}.png
       # Readme
       - name: Create README.md if missing
         run: |
           if [ ! -f README.md ]; then
-            echo "# ${{ steps.extract.outputs.scad_name }}" > README.md
+            echo "# ${{ matrix.name }}" > README.md
             echo "" >> README.md
-            echo "![preview](${{ steps.extract.outputs.scad_name }}.png)" >> README.md
+            echo "![preview](${{ matrix.name }}.png)" >> README.md
             echo "Created README.md"
           else
             echo "README.md already exists, skipping creation"
           fi
-
       # Commit
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Add STL & preview for ${{ matrix.folder }}/${{ steps.extract.outputs.scad_name }}.scad" || echo "No changes to commit"
+          git commit -m "Add STL & preview for ${{ matrix.folder }}/${{ matrix.name }}.scad" || echo "No changes to commit"
           git push
